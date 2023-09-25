@@ -1,0 +1,13 @@
+name: gumroad
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - pip
+  - python=3.9.6
+  - pip:
+    - boto3==1.28.50
+    - sagemaker==2.186.0
+    - fastai==2.7.12
+    - ipykernel==6.25.2
+    - flask

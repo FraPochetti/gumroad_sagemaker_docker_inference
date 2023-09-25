@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+
+import logging
+from flask import Flask, request, Response, jsonify
+import base64, io
+from fastai.vision.all import *
+
+logging.basicConfig()
+logging.getLogger().setLevel(logging.INFO)
+
+app = Flask(__name__)    
+
+def load_image(request):
+    data = request.get_json()
+    encoded_image = data.get('image')
+    image_bytes = base64.b64decode(encoded_image)
+    image = Image.open(io.BytesIO(image_bytes))
+    return image
+
+def get_y(x): pass
+def acc_faces(x): pass
+
+MODEL = load_learner('/opt/ml/model/faces.pkl', cpu=True)
+logging.info("Fastai learner loaded")
+
+@app.route("/invocations", methods=["POST"])
+def predict():
+    img = load_image(request)
+    logging.info(f"Processing image of shape: {img.shape}")
+    img.thumbnail((512, 512))
+    logging.info(f"Reshaped to: {img.shape}")
+    
+    pred_mask, _, _ = MODEL.predict(img) 
+    logging.info(f"Predicted mask of shape: {pred_mask.shape}")
+    
+    output_list = pred_mask.numpy().flatten().tolist()
+    output_list = [int(i) for i in output_list]
+
+    return jsonify({'mask': output_list})
+    
+@app.route("/ping")
+def ping(): return Response(response="OK", status=200)
+
+app.run(host="0.0.0.0", port=8080)

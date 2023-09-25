@@ -1,0 +1,15 @@
+FROM python:3.9
+
+RUN apt-get update
+
+RUN pip install --upgrade pip
+RUN pip install fastai==2.7.12
+RUN pip install flask
+
+RUN mkdir -p /opt/ml/model/
+WORKDIR /opt/ml/model/
+COPY serve ./serve
+COPY ./opt/ml/model/faces.pkl ./faces.pkl
+ENV PATH="/opt/ml/model/:$PATH"
+
+EXPOSE 8080
